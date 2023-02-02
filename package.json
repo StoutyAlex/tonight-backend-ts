@@ -1,0 +1,28 @@
+{
+  "name": "tonight-backend-ts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "synth:windows": "cdk synth --no-staging | Out-File -FilePath template.yaml -Encoding utf8",
+    "local:windows": "sam local start-api --template template.yaml"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@swc/jest": "^0.2.24",
+    "@types/aws-lambda": "^8.10.110",
+    "@types/node": "^18.11.18",
+    "aws-cdk": "^2.63.0",
+    "aws-cdk-lib": "^2.63.0",
+    "aws-lambda": "^1.0.7",
+    "constructs": "^10.1.238",
+    "esbuild": "^0.17.5",
+    "jest": "^29.4.1",
+    "ts-jest": "^29.0.5",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.5"
+  }
+}

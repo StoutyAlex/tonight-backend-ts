@@ -1,0 +1,304 @@
+﻿Resources:
+  tonightlambdaServiceRole5EE8ED9D:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    Metadata:
+      aws:cdk:path: tonight-stack/tonight-lambda/ServiceRole/Resource
+  tonightlambdaF2171728:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket:
+          Fn::Sub: cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}
+        S3Key: ff7b426db7bd41cd9266f0d263c42b589454e1b7cbc7d185b11b8eac5ad63206.zip
+      Role:
+        Fn::GetAtt:
+          - tonightlambdaServiceRole5EE8ED9D
+          - Arn
+      Environment:
+        Variables:
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+      FunctionName: tonight-lambda
+      Handler: index.handler
+      Runtime: nodejs16.x
+    DependsOn:
+      - tonightlambdaServiceRole5EE8ED9D
+    Metadata:
+      aws:cdk:path: tonight-stack/tonight-lambda/Resource
+      aws:asset:path: C:\Developer\work\tonight-backend-ts\cdk.out\asset.ff7b426db7bd41cd9266f0d263c42b589454e1b7cbc7d185b11b8eac5ad63206
+      aws:asset:is-bundled: true
+      aws:asset:property: Code
+  tonightapi2C300D74:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Description: This is the backend for the Tonight app
+      Name: Tonight Backend
+    Metadata:
+      aws:cdk:path: tonight-stack/tonight-api/Resource
+  tonightapiCloudWatchRoleE00AFE12:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Metadata:
+      aws:cdk:path: tonight-stack/tonight-api/CloudWatchRole/Resource
+  tonightapiAccountB7047A26:
+    Type: AWS::ApiGateway::Account
+    Properties:
+      CloudWatchRoleArn:
+        Fn::GetAtt:
+          - tonightapiCloudWatchRoleE00AFE12
+          - Arn
+    DependsOn:
+      - tonightapi2C300D74
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Metadata:
+      aws:cdk:path: tonight-stack/tonight-api/Account
+  tonightapiDeployment79A5BE44bc02b34a6226bccdbd6dd82bdd21210b:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId:
+        Ref: tonightapi2C300D74
+      Description: This is the backend for the Tonight app
+    DependsOn:
+      - tonightapistatusGET031F8D1F
+      - tonightapistatus57B2C122
+    Metadata:
+      aws:cdk:path: tonight-stack/tonight-api/Deployment/Resource
+  tonightapiDeploymentStageprod44F73BD3:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId:
+        Ref: tonightapi2C300D74
+      DeploymentId:
+        Ref: tonightapiDeployment79A5BE44bc02b34a6226bccdbd6dd82bdd21210b
+      StageName: prod
+    DependsOn:
+      - tonightapiAccountB7047A26
+    Metadata:
+      aws:cdk:path: tonight-stack/tonight-api/DeploymentStage.prod/Resource
+  tonightapistatus57B2C122:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId:
+        Fn::GetAtt:
+          - tonightapi2C300D74
+          - RootResourceId
+      PathPart: status
+      RestApiId:
+        Ref: tonightapi2C300D74
+    Metadata:
+      aws:cdk:path: tonight-stack/tonight-api/Default/status/Resource
+  tonightapistatusGETApiPermissiontonightstacktonightapi308F5F10GETstatusA44C0712:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - tonightlambdaF2171728
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: tonightapi2C300D74
+            - /
+            - Ref: tonightapiDeploymentStageprod44F73BD3
+            - /GET/status
+    Metadata:
+      aws:cdk:path: tonight-stack/tonight-api/Default/status/GET/ApiPermission.tonightstacktonightapi308F5F10.GET..status
+  tonightapistatusGETApiPermissionTesttonightstacktonightapi308F5F10GETstatus05C43E21:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - tonightlambdaF2171728
+          - Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+          - ""
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
+            - Ref: AWS::AccountId
+            - ":"
+            - Ref: tonightapi2C300D74
+            - /test-invoke-stage/GET/status
+    Metadata:
+      aws:cdk:path: tonight-stack/tonight-api/Default/status/GET/ApiPermission.Test.tonightstacktonightapi308F5F10.GET..status
+  tonightapistatusGET031F8D1F:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: GET
+      ResourceId:
+        Ref: tonightapistatus57B2C122
+      RestApiId:
+        Ref: tonightapi2C300D74
+      AuthorizationType: NONE
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri:
+          Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - ":apigateway:"
+              - Ref: AWS::Region
+              - :lambda:path/2015-03-31/functions/
+              - Fn::GetAtt:
+                  - tonightlambdaF2171728
+                  - Arn
+              - /invocations
+    Metadata:
+      aws:cdk:path: tonight-stack/tonight-api/Default/status/GET/Resource
+  CDKMetadata:
+    Type: AWS::CDK::Metadata
+    Properties:
+      Analytics: v2:deflate64:H4sIAAAAAAAA/1WQzU7DMBCEn6V3ZyGthLimRdz4UXmAyHWWsElsR1mbqory7qwdoHCab1br0ay3cLeD240+c2GavhjoBPNb0KZXMqrnQdtTo2vnG+wYnrM8RmcCeadIW5iPfkB1eHdJF8W7WjNjYKiSiId9ND2GvWZUaxrMsv4bIvyKkyVmcYvSI7U64FlfJBo5VCPl9CtWxvjognrAcfAXi4Iy/eOkfpsrrSBPfZwM5gY/5jtz5ScMH75Jo5WW5bqXz0hB5Nq08RLDGMO/58IH7xoK+YD0VdDxzWd5D+UWyk3HRMUkjckiHFf9Aobc7Mp2AQAA
+    Metadata:
+      aws:cdk:path: tonight-stack/CDKMetadata/Default
+    Condition: CDKMetadataAvailable
+Outputs:
+  tonightapiEndpoint33218F64:
+    Value:
+      Fn::Join:
+        - ""
+        - - https://
+          - Ref: tonightapi2C300D74
+          - .execute-api.
+          - Ref: AWS::Region
+          - "."
+          - Ref: AWS::URLSuffix
+          - /
+          - Ref: tonightapiDeploymentStageprod44F73BD3
+          - /
+Conditions:
+  CDKMetadataAvailable:
+    Fn::Or:
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - af-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ca-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-northwest-1
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-3
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - me-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - sa-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-2
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-west-2
+Parameters:
+  BootstrapVersion:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /cdk-bootstrap/hnb659fds/version
+    Description: Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]
+Rules:
+  CheckBootstrapVersion:
+    Assertions:
+      - Assert:
+          Fn::Not:
+            - Fn::Contains:
+                - - "1"
+                  - "2"
+                  - "3"
+                  - "4"
+                  - "5"
+                - Ref: BootstrapVersion
+        AssertDescription: CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.
+
