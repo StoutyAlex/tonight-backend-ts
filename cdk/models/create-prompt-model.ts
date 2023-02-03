@@ -7,7 +7,7 @@ export class CreatePromptModel extends Model {
       restApi,
       contentType: 'application/json',
       description: 'Validates prompt create',
-      modelName: 'create-prompt-model',
+      modelName: 'CreatePromptModel',
       schema: {
         type: JsonSchemaType.OBJECT,
         required: ['promptId'],

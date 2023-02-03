@@ -3,4 +3,9 @@ import { App } from 'aws-cdk-lib'
 
 const app = new App()
 
-new TonightStack(app, 'tonight-stack')
+new TonightStack(app, 'tonight-stack', {
+    env: {
+        account: '477948800870',
+        region: 'eu-west-1'
+    }
+})
